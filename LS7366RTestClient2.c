@@ -288,7 +288,7 @@ __interrupt void timer0A1ISR(void){
         posCntFrHm = *posCount - posHome;
         if(dispMode == 1){
             if (*posCount - posHome != posCountPrev){
-                nokLcdDispLineMode(posCntFrHm);
+                nokLcdDispLineMode();
                 // posHome is the reference point... pass the difference.
             }
 
@@ -296,7 +296,7 @@ __interrupt void timer0A1ISR(void){
         }
         else if(dispMode == 2){
             if (*posCount - posHome != posCountPrev){
-                nokLcdDispBarMode(posCntFrHm);
+                nokLcdDispBarMode();
                 // posHome is the reference point... pass the difference.
             }
         }

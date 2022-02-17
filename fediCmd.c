@@ -24,7 +24,7 @@ static double angle360 = 0;
 *   we consider currentPosCount = posCount (from the encoder) - posHome.
 *   because posHome is a new reference.
 * argument: (long int) initVal - new reference posCount
-* return: (char) 0 success, otherwise failed.
+* return: (int) 0 success, otherwise failed.
 * Author: Gwang Sik Kim
 * Date: Feb 9, 2022
 * Modified: <date of any mods> usually taken care of by rev control

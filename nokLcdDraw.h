@@ -44,8 +44,8 @@
 
 
 
-int nokLcdDispLineMode(long signed int posCount);
-int nokLcdDispBarMode(long signed int posCount);
+int nokLcdDispLineMode(void);
+int nokLcdDispBarMode(void);
 double degToRad(double degAng);
 double radToDeg(double radAng);
 void nokLcdWriteXY(int xLoc1, int xLoc2, int yBank1, int yBank2, int wrt);

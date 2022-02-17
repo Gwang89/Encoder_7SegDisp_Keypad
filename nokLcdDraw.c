@@ -61,14 +61,15 @@ static long signed int posCountTotal = 0;
 * Function: nokLcdDispLineMode
 * - to display single line to indicate what angle it is now based on posCount
 * argument:
-*       (long int) posCount - current posCount read from LS7366R
+*       (void)
+*       global variable posCntFrHm is being used - current posCount read from LS7366R
 * return: (int) 0 to 24 success (index indicates the angle * minimum_angle / -1 failure
 * Author: Gwang Sik Kim
 * Date: Feb 14, 2022
 * Modified: <date of any mods> usually taken care of by rev control
 ************************************************************************************/
 //int nokLcdDispLineMode(long int posCnt){
-int nokLcdDispLineMode(long int posCnt){
+int nokLcdDispLineMode(void){
     posCountTotal = posCntFrHm;
 
     if(posCountTotal >= 0){
@@ -392,13 +393,14 @@ int nokLcdDispLineMode(long int posCnt){
 * Function: nokLcdDispBarMode
 * - to display progress bar to indicate what angle and how many turns it is now based on posCount
 * argument:
-*       (long int) posCount - current posCount read from LS7366R  - posHome (referred to the reference)
+*       (void)
+*       global variable posCntFrHm is being used
 * return: (int) 0 to 4 (mode indicates how the progress proceeds / -1 failure
 * Author: Gwang Sik Kim
 * Date: Feb 14, 2022
 * Modified: <date of any mods> usually taken care of by rev control
 ************************************************************************************/
-int nokLcdDispBarMode(long int posCnt){
+int nokLcdDispBarMode(void){
     int errIdx = -1;
     //nokLcdClear(); // update, refresh.
     char mode;
@@ -697,42 +699,6 @@ int nokLcdDispBarMode(long int posCnt){
     }
 
 }
-
-
-    /*
-void nokLcdWriteXY(int xLoc1, int xLoc2, int yBank1, int yBank2, int wrt){
-    int xPos;
-    int bank;
-    char data;
-    if (wrt == 1){
-        data = 0xFF;
-    }
-    else if (wrt == 0){
-        data = 0x0;
-    }
-
-
-
-    if (yBank1 < yBank2){
-        for (bank = yBank1; bank < yBank2; bank++){
-            for (xPos = 0; xPos < xLoc2 ; xPos++){
-                // set the x and y RAM address  corresponding to the desired (x,bank) location. this is a command DC_CMD
-                nokLcdWrite(LCD_SET_XRAM | xPos, DC_CMD);
-                nokLcdWrite(LCD_SET_YRAM | yBank2, DC_CMD);
-                nokLcdWrite(data, DC_DAT); // write the data. this is DATA DC_DAT
-            }
-        }
-        for (xPos = 0; xPos < xLoc2 ; xPos++){
-            // set the x and y RAM address  corresponding to the desired (x,bank) location. this is a command DC_CMD
-            nokLcdWrite(LCD_SET_XRAM | xPos, DC_CMD);
-            nokLcdWrite(LCD_SET_YRAM | yBank2, DC_CMD);
-            nokLcdWrite(data, DC_DAT); // write the data. this is DATA DC_DAT
-        }
-    }
-}
-
-*/
-
 
 
 /************************************************************************************

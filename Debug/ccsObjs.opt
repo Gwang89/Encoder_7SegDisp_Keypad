@@ -1,0 +1,1 @@
+"./LS7366R.obj" "./LS7366RTestClient2.obj" "./fediCmd.obj" "./nok5110LCD.obj" "./nokLcdDraw.obj" "./ucsiUart.obj" "./usciCmdInterpreter.obj" "./usciSpi.obj" "../lnk_msp430f5529.cmd" -llibmath.a -llibc.a 
