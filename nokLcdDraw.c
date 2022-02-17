@@ -24,6 +24,9 @@ static long signed int posCountTotal = 0;
 
 // posCount -> LCD display updated with flywheel angle.
 
+
+
+
 // pseudo-code
 /*
  * 1. Line Mode
@@ -43,17 +46,46 @@ static long signed int posCountTotal = 0;
  * to represent its angle...
  *
  *
- * (1) posCount = posCount % 4600 -> confined its range up to 4600. one revolution
- *     - if posCount is negative, +4600 until it is within the range
  *
- * (2) fine the index number, which gives what range the posCount is now,
- *      so that we know where it is in terms of MINIMUM DEG as a count.
- *      ex) 2500 posCount -> index = 13.
  *
- *  (3) draw the line following the index number.
- *     - Because of the limitation of the pixels,
- *     it is not beautiful but we can draw the line by pre-setting the pixel destination
- *     referred to nokLcdDraw.h define statement as macros.
+ * **** assume posCount - posHome is already calculated before this function is called...
+ *
+ *  (1)
+ *  if (posCount >= 0){
+ *      posCount % 4600 // confined its range up to 4600. one revolution
+ *  }
+ *  else{
+ *      posCount += 4600 // force posCount to be in a range of 0 to 4600.
+ *
+ *  (2) find_index_number
+ *      if (posCount is between 0 to 191 ( = 4600 / 360 * 15 )), index = 0
+ *      else if (posCount is between 191 to 191 * 2), index = 1.
+ *      keep going...
+ *      else if (posCount is between 191 * 23 to 191 * 24), index = 23.
+ *      else if (posCount is between 191 * 24 to 191 * 25), index = 24. -- last range.
+ *      else{
+ *          index = -1. // error case.
+ *      }
+ *
+ *  (3) update LCD screen.
+ *   if posCount has been changed
+ *      LCD_clear
+ *      draw_line_from_center_point_to_corresponding_point_matched_to_index
+ *      // in this case, we use pre-defined point as a destination point
+ *      // following the corresponding index value.
+ *      // for example, if it's 90 deg,
+ *      // nokLcdDrawLine(LINE_MODE_CTR_X, LINE_MODE_CTR_Y, 60, 20)
+ *      // need to define it in .h file.
+ *
+ *   (4) update indexPrev = index (current)
+ *              posCountPrev= posCount
+ *              // this has to be done so that when it doesn't have to be drawn, don't update it...
+ *   (5) return errorIndex.
+ *
+ *
+ *
+ *
+ *
  */
 
 
@@ -161,97 +193,6 @@ int nokLcdDispLineMode(void){
         index = -1;
     }
 
-    /*
-    if(posCnt >= 0){
-        posCnt = posCnt % POSCOUNT_PER_REV;
-    }
-    else{
-        while(posCnt < 0){
-            posCnt += POSCOUNT_PER_REV;
-        }
-    }
-    int index = -1;
-
-    if(posCnt >=0 && posCnt < (POSCOUNT_MIN_DEG * 1)){
-        index = 0;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 2) {
-        index = 1;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 3){
-        index = 2;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 4){
-        index = 3;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 5){
-        index = 4;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 6){
-        index = 5;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 7){
-        index = 6;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 8){
-        index = 7;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 9){
-        index = 8;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 10){
-        index = 9;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 11){
-        index = 10;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 12){
-        index = 11;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 13){
-        index = 12;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 14){
-        index = 13;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 15){
-        index = 14;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 16){
-        index = 15;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 17){
-        index = 16;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 18){
-        index = 17;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 19){
-        index = 18;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 20){
-        index = 19;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 21){
-        index = 20;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 22){
-        index = 21;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 23){
-        index = 22;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 24){
-        index = 23;
-    }
-    else if(posCnt < POSCOUNT_MIN_DEG * 25){
-        index = 24;
-    }
-    else{
-        index = -1;
-    }
-    */
-
     // index comparison and update it only when it's different
 
     if(index == idxPrev){
@@ -346,12 +287,17 @@ int nokLcdDispLineMode(void){
 }
 
 
+
+
+
+
+
 /*
  *
  *
  * pseudo-code
  * 2. Horizontal Bar Mode
- * (1) read posCount
+ * (1) check if posCount is updated.
  * (2) if posCount >= 0
  *          positive mode. represent current posCount as a filled pixel.
  *          set the number of pixels of corresponding the posCount value.
@@ -385,6 +331,97 @@ int nokLcdDispLineMode(void){
  *   --> compare two values and we can decide whether we are going backwards/forwards.
  *
  *
+ * =========================================================================================
+ * (1) // mode = 0 to 4
+ *     // mode 0 : no update.
+ *     // mode 1 : positive mode, advance.
+ *     // mode 2 : negative mode, retreat
+ *     // mode 3 : negative mode. increasing posCount (towards positive)
+ *     // mode 4 : negative mode, decreasing pos Count (towards more negative)
+ *
+ *    if (posCntPrev == posCnt){
+ *      mode = 0. no updates.
+ *      break.
+ *    }
+ *
+ * (2) mode setting.
+ *    if (posCount > 0)
+ *       if (posCount > posCountPrev), mode = 1
+ *       else, mode = 2
+ *
+ *    else
+ *       if (posCount > posCountPrev), mode = 3
+ *       else, mode = 4
+ *
+ * (3) calculate how many lines (rev) and columns (xPos) are needed...
+ *   posCountTotal = posCount; //copy
+ *   posCountTotal = posCountTotal mod ( 4600 * 6 )//posCountTotal is within 4600 * 6 range...
+ *
+ * (4)
+ *   rev = posCountTotal mod 4600 // how many turns we are...
+ *   xPos = posCountTotal / 4600 * 84 // what column we should advance...
+ *
+ *
+ * (5) set pixels...
+ *  switch(mode){
+ *  // each mode is also divided into two cases; one is when the updated posCount and the previous posCount are in the same line
+ *  // and the other is when they are in different lines.
+ *  mode 1:
+ *      if (the line is the same)
+ *      for loop
+ *          draw the line from previous xPos to current xPos (fill the pixels. 0xFF)
+ *
+ *      if (the line is changed)
+ *          for loop
+ *              draw the entire line in the previous banks   (here, bank is lower number!)
+ *          for loop
+ *              draw the line from 0 to the current xPos
+ *  mode 2:
+ *      if (the line is the same)
+ *      for loop
+ *          clear the line from previous xPos to current xPos (clear the pixels. 0x00)
+ *
+ *      if (the line is changed)
+ *          for loop
+ *              clear the entire line in the previous banks
+ *          for loop
+ *              clear the line from 83 (max_col_xPos) to the current xPos
+ *
+ *
+ *  mode 3://negative mode, increasing posCount... clear the pixels..
+ *      if (the line is the same)
+ *      for loop
+ *          draw the line from previous xPos to current xPos
+ *
+ *      if (the line is changed)
+ *          for loop
+ *              draw the entire line in the previous banks
+ *          for loop
+ *              draw the line from 0 to the current xPos
+ *
+ *
+ *  mode 4://negative mode, decreasing posCount... fill the pixels.
+ *      if (the line is the same)
+ *      for loop
+ *          draw the line from previous xPos to current xPos (fill the pixels, 0xFF)
+ *
+ *      if (the line is changed)
+ *          for loop
+ *              draw the entire line in the previous banks (here, bank is higher number!)
+ *          for loop
+ *              draw the line from MAX_COL_xPos to the current xPos
+ *
+ *
+ *
+ *  }
+ *
+ *
+ * (6) //update previous values to the current values
+ *     posCountPrev = posCount
+ *     xPosPrev = xPos
+ *     revPrev = rev
+ *
+ * (7)  return errIdx // -1 failed. 0 to 4 -> mode index.
  *
  */
 
